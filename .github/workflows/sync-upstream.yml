@@ -53,6 +53,27 @@ jobs:
             git merge --abort || true
             git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution"
           }
+
+          # 自动根据根目录 VERSION 同步更新 .claude-plugin/*.json 版本号
+          if [ -f "VERSION" ]; then
+            NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
+            if [ -n "$NEW_VERSION" ]; then
+              echo "Checking plugin version against VERSION ($NEW_VERSION)..."
+              if [ -f ".claude-plugin/plugin.json" ]; then
+                jq --arg v "$NEW_VERSION" '.version = $v' .claude-plugin/plugin.json > .claude-plugin/plugin.json.tmp && mv .claude-plugin/plugin.json.tmp .claude-plugin/plugin.json
+              fi
+              if [ -f ".claude-plugin/marketplace.json" ]; then
+                jq --arg v "$NEW_VERSION" '.plugins[0].version = $v' .claude-plugin/marketplace.json > .claude-plugin/marketplace.json.tmp && mv .claude-plugin/marketplace.json.tmp .claude-plugin/marketplace.json
+              fi
+
+              if ! git diff --quiet .claude-plugin/; then
+                echo "Plugin version changed, committing version bump..."
+                git add .claude-plugin/
+                git commit -m "chore(plugin): sync plugin version to $NEW_VERSION"
+              fi
+            fi
+          fi
+
           git push origin main
           echo "Sync completed successfully."
 
