@@ -1,0 +1,62 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天每 6 小时自动检测一次 (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # 支持在 GitHub 页面手动一键触发
+
+jobs:
+  sync:
+    name: Sync Upstream Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream Remote and Fetch
+        run: |
+          git remote add upstream https://github.com/zhaoxuya520/reverse-skill.git || true
+          git fetch upstream main
+
+      - name: Check for Upstream Updates
+        id: check_sync
+        run: |
+          BEHIND_COUNT=$(git rev-list --count HEAD..upstream/main)
+          echo "Commits behind upstream: $BEHIND_COUNT"
+          if [ "$BEHIND_COUNT" -gt 0 ]; then
+            echo "has_updates=true" >> "$GITHUB_OUTPUT"
+            echo "count=$BEHIND_COUNT" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_updates=false" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge Upstream Changes
+        if: steps.check_sync.outputs.has_updates == 'true'
+        run: |
+          echo "Syncing ${{ steps.check_sync.outputs.count }} commit(s) from upstream..."
+          git merge upstream/main --no-edit -m "chore(sync): sync ${{ steps.check_sync.outputs.count }} commit(s) from upstream (zhaoxuya520/reverse-skill)" || {
+            echo "Conflict detected! Merging with upstream strategy..."
+            git merge --abort || true
+            git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution"
+          }
+          git push origin main
+          echo "Sync completed successfully."
+
+      - name: Up to Date
+        if: steps.check_sync.outputs.has_updates == 'false'
+        run: |
+          echo "Repository is already up to date with upstream."

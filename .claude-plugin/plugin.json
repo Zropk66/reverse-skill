@@ -1,0 +1,26 @@
+{
+  "name": "reverse-skill",
+  "version": "1.0.1",
+  "description": "Reverse engineering, security auditing, mobile analysis, penetration testing, and CTF skill router pack",
+  "author": {
+    "name": "zhaoxuya520",
+    "url": "https://github.com/zhaoxuya520/reverse-skill"
+  },
+  "homepage": "https://github.com/Zropk66/reverse-skill",
+  "repository": "https://github.com/Zropk66/reverse-skill",
+  "license": "MIT",
+  "keywords": [
+    "reverse-engineering",
+    "security",
+    "ctf",
+    "pentest",
+    "mobile-analysis",
+    "binary-diff",
+    "malware-analysis",
+    "claude-code",
+    "skills"
+  ],
+  "skills": [
+    "./skills/"
+  ]
+}

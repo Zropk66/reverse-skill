@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "reverse-skill",
+  "description": "Reverse engineering, security auditing, mobile analysis, penetration testing, and CTF skill router pack",
+  "owner": {
+    "name": "Zropk66",
+    "url": "https://github.com/Zropk66/reverse-skill"
+  },
+  "plugins": [
+    {
+      "name": "reverse-skill",
+      "description": "Reverse engineering, security auditing, mobile analysis, penetration testing, and CTF skill router pack",
+      "source": "./",
+      "version": "1.0.1",
+      "category": "security"
+    }
+  ]
+}
