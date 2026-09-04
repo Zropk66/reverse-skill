@@ -48,13 +48,13 @@ jobs:
         if: steps.check_sync.outputs.has_updates == 'true'
         run: |
           echo "Syncing ${{ steps.check_sync.outputs.count }} commit(s) from upstream..."
-          git merge upstream/main --no-edit -m "chore(sync): sync ${{ steps.check_sync.outputs.count }} commit(s) from upstream (zhaoxuya520/reverse-skill)" || {
+          git merge upstream/main --no-edit -m "chore(sync): sync ${{ steps.check_sync.outputs.count }} commit(s) from upstream (zhaoxuya520/reverse-skill) [skip ci]" || {
             echo "Conflict detected! Merging with upstream strategy..."
             git merge --abort || true
-            git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution"
+            git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution [skip ci]"
           }
       
-          # 自动版本更新
+          # 版本更新（不变）
           if [ -f "VERSION" ]; then
             NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
             if [ -n "$NEW_VERSION" ]; then
@@ -79,8 +79,8 @@ jobs:
             exit 1
           fi
       
-          # 🔑 关键：使用 PAT 直接推送，不依赖任何 remote
-          echo "Pushing with PAT token..."
+          # 🔑 关键：直接使用带 PAT 的 URL 推送
+          echo "Pushing with PAT..."
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} main
       
           echo "Sync completed successfully."
