@@ -53,8 +53,8 @@ jobs:
             git merge --abort || true
             git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution"
           }
-
-          # 自动根据根目录 VERSION 同步更新 .claude-plugin/*.json 版本号
+      
+          # 自动版本更新（保持原样）
           if [ -f "VERSION" ]; then
             NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
             if [ -n "$NEW_VERSION" ]; then
@@ -65,7 +65,6 @@ jobs:
               if [ -f ".claude-plugin/marketplace.json" ]; then
                 jq --arg v "$NEW_VERSION" '.plugins[0].version = $v' .claude-plugin/marketplace.json > .claude-plugin/marketplace.json.tmp && mv .claude-plugin/marketplace.json.tmp .claude-plugin/marketplace.json
               fi
-
               if ! git diff --quiet .claude-plugin/; then
                 echo "Plugin version changed, committing version bump..."
                 git add .claude-plugin/
@@ -73,8 +72,11 @@ jobs:
               fi
             fi
           fi
-
+      
+          # 🔑 关键：改用 PAT 进行认证推送
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
           git push origin main
+      
           echo "Sync completed successfully."
 
       - name: Up to Date
