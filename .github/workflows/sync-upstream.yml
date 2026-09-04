@@ -2,9 +2,8 @@ name: Sync Upstream
 
 on:
   schedule:
-    # 每天每 6 小时自动检测一次 (00:00, 06:00, 12:00, 18:00 UTC)
     - cron: '0 */6 * * *'
-  workflow_dispatch: # 支持在 GitHub 页面手动一键触发
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -13,6 +12,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
 
     steps:
       - name: Checkout repository
@@ -54,7 +54,7 @@ jobs:
             git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution [skip ci]"
           }
       
-          # 版本更新（不变）
+          # 版本更新（保持不变）
           if [ -f "VERSION" ]; then
             NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
             if [ -n "$NEW_VERSION" ]; then
@@ -73,15 +73,8 @@ jobs:
             fi
           fi
       
-          # 检查 PAT_TOKEN 是否存在
-          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
-            echo "ERROR: PAT_TOKEN secret is not set or empty!"
-            exit 1
-          fi
-      
-          # 🔑 关键：直接使用带 PAT 的 URL 推送
-          echo "Pushing with PAT..."
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} main
+          # ✅ 使用内置 GITHUB_TOKEN 推送（已通过 permissions 授权）
+          git push origin main
       
           echo "Sync completed successfully."
 
