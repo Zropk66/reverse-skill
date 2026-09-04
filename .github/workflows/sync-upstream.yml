@@ -54,7 +54,7 @@ jobs:
             git merge -X theirs upstream/main --no-edit -m "chore(sync): merge upstream changes with conflict resolution"
           }
       
-          # 自动版本更新（保持原样）
+          # 自动版本更新
           if [ -f "VERSION" ]; then
             NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
             if [ -n "$NEW_VERSION" ]; then
@@ -73,17 +73,14 @@ jobs:
             fi
           fi
       
-          # ✅ 检查 PAT_TOKEN 是否存在
+          # 检查 PAT_TOKEN 是否存在
           if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
             echo "ERROR: PAT_TOKEN secret is not set or empty!"
             exit 1
           fi
       
-          # ✅ 打印当前 remote（辅助调试）
-          echo "Current remote URL:"
-          git remote -v
-      
-          # ✅ 关键：使用 PAT 直接推送，不依赖 remote
+          # 🔑 关键：使用 PAT 直接推送，不依赖任何 remote
+          echo "Pushing with PAT token..."
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} main
       
           echo "Sync completed successfully."
