@@ -73,9 +73,18 @@ jobs:
             fi
           fi
       
-          # 🔑 关键：改用 PAT 进行认证推送
-          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
-          git push origin main
+          # ✅ 检查 PAT_TOKEN 是否存在
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "ERROR: PAT_TOKEN secret is not set or empty!"
+            exit 1
+          fi
+      
+          # ✅ 打印当前 remote（辅助调试）
+          echo "Current remote URL:"
+          git remote -v
+      
+          # ✅ 关键：使用 PAT 直接推送，不依赖 remote
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} main
       
           echo "Sync completed successfully."
 
