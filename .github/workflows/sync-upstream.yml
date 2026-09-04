@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@f592c3b3a3282f5efb3c13d71d5c35528b8f0db6  # v4.1.7
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7 完整 SHA
         with:
           fetch-depth: 0
           ref: main
